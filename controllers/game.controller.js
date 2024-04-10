@@ -22,10 +22,8 @@ module.exports.detail = async (req, res) => {
       const {
          id
       } = req.params;
-
-      const record = await pool.request().query(`select * from Game where GameID = ${id}`);
-      const result = record.recordset;
-      res.status(200).json(result);
+      const game = await Game.findByPk(id)
+      res.status(200).json(game);
    } catch (err) {
       res.status(800).json(err);
    }
@@ -36,10 +34,7 @@ module.exports.create = async (req, res) => {
    try {
       const data = req.body;
       console.log(data);
-      const record = await pool.request().query(`
-      INSERT INTO Game(Name, Price, UploadDate, Discount, Description, Requirement, Images, DownloadLink)
-      VALUES ('${data.Name}', ${data.Price}, ${data.UploadDate}, ${data.Discount}, '${data.Description}', '${data.Requirement}', '${data.Images}', '${data.DownloadLink}');
-  `);
+      const game = await Game.create({})
       res.json({
          code:200,
          message: "Tạo thành công!"
