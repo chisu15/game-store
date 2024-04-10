@@ -1,11 +1,9 @@
 const Game = require("../models/game.model");
 
-
 // [GET] INDEX
 module.exports.index = async (req, res) => {
    try {
-      // const record = await pool.request().query('select * from Game');
-      // const result = record.recordset;
+
       const games = await Game.findAll()
       
       res.status(200).json({
