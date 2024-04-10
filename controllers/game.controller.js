@@ -32,12 +32,13 @@ module.exports.detail = async (req, res) => {
 // [POST] CREATE
 module.exports.create = async (req, res) => {
    try {
-      const data = req.body;
-      console.log(data);
-      const game = await Game.create({})
+      const { Name, Price, UploadDate, Discount, Description, Requirement, Images, DownloadLink } = req.body;
+      console.log(req.body);
+      const data = { Name, Price, UploadDate, Discount, Description, Requirement, Images, DownloadLink };
+      await Game.create(data);
       res.json({
          code:200,
-         message: "Tạo thành công!"
+         message: "Tạo thành công!",
       })
    } catch (err) {
       res.json({

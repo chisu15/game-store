@@ -15,7 +15,7 @@ const Game = db.define('Game', {
     },
     AdminId: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
     },
     Name: {
         type: DataTypes.STRING,
@@ -37,19 +37,22 @@ const Game = db.define('Game', {
     },
     DownloadLink: {
         type: DataTypes.STRING,
+        
     },
     CreatedAt: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
     },
     UpdatedAt: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
     }
 }, {
 
     tableName: 'Game',
-    timestamps: true
+    timestamps: false
 });
 
 module.exports = Game;
