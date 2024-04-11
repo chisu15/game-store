@@ -1,5 +1,5 @@
 // model/User.js
-
+const createSlug = require("../helpers/createSlug");
 const {
     Sequelize,
     DataTypes
@@ -9,9 +9,8 @@ const db = require('../configs/db');
 const Game = db.define('Game', {
     // Định nghĩa các trường của bảng Users
     GameId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         primaryKey: true,
-        autoIncrement: true
     },
     AdminId: {
         type: DataTypes.INTEGER,
@@ -19,6 +18,7 @@ const Game = db.define('Game', {
     },
     Name: {
         type: DataTypes.STRING,
+        unique: true
     },
     Price: {
         type: DataTypes.DECIMAL(6, 2),
@@ -48,6 +48,10 @@ const Game = db.define('Game', {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    },
+    Slug: {
+        type: DataTypes.STRING,
+        unique:true
     }
 }, {
 
@@ -55,4 +59,6 @@ const Game = db.define('Game', {
     timestamps: false
 });
 
+
+Game.sync();
 module.exports = Game;

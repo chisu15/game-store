@@ -1,7 +1,9 @@
-const {
-   where
-} = require("sequelize");
+const sequelize = require("sequelize");
 const Game = require("../models/game.model");
+const {
+   createSlug
+} = require("../helpers/createSlug");
+const { generateRandomString } = require("../helpers/generate");
 
 // [GET] INDEX
 module.exports.index = async (req, res) => {
@@ -35,28 +37,13 @@ module.exports.detail = async (req, res) => {
 // [POST] CREATE
 module.exports.create = async (req, res) => {
    try {
-      const {
-         Name,
-         Price,
-         UploadDate,
-         Discount,
-         Description,
-         Requirement,
-         Images,
-         DownloadLink
-      } = req.body;
+      const data = req.body;
       console.log(req.body);
-      const data = {
-         Name,
-         Price,
-         UploadDate,
-         Discount,
-         Description,
-         Requirement,
-         Images,
-         DownloadLink
-      };
-      await Game.create(data);
+      await Game.create({
+         GameId: generateRandomString(32),
+         ...data,
+         Slug: createSlug(data.Name)
+      });
       res.json({
          code: 200,
          message: "Tạo thành công!",
@@ -77,7 +64,11 @@ module.exports.edit = async (req, res) => {
          id
       } = req.params;
       const data = req.body;
-      const game = await Game.update(data, {
+      const gameBefore = await Game.findByPk(id)
+      if (gameBefore.Name != data.Name) {
+         data.Slug = createSlug(data.Name);
+      }
+      const gameAfter = await Game.update(data, {
          where: {
             GameId: id
          }
@@ -91,8 +82,44 @@ module.exports.edit = async (req, res) => {
       res.json({
          code: 400,
          message: "Cập nhật thất bại!",
-         err: err
+         err: error
       });
    }
+}
 
+// [DELETE] DELETE
+module.exports.delete = async (req, res) => {
+   try {
+      const {
+         id
+      } = req.params;
+      const game = await Game.findByPk(id)
+      if (!game) {
+         return res.status(404).json({
+            code: 404,
+            message: "Không tìm thấy game"
+         });
+      }
+      await game.destroy();
+      
+
+      res.json({
+         code: 200,
+         message: "Xóa thành công!"
+      });
+   } catch (error) {
+      res.json({
+         code: 400,
+         message: "Xóa thất bại!",
+         err: error
+      });
+   }
+}
+
+// [PATCH] CHANGE MULTI
+module.exports.changeMulti = async (req, res) => {
+   const {ids} = req.params;
+   ids.forEach(id => {
+      console.log(id, '\n');
+   });
 }
