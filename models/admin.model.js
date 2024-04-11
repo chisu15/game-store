@@ -4,38 +4,32 @@ const {
 } = require('sequelize');
 const db = require('../configs/db');
 
-const Game = db.define('Game', {
-    GameId: {
+const Admin = db.define('Admin', {
+    AdminId: {
         type: DataTypes.STRING,
         primaryKey: true,
     },
-    AdminId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-    },
-    Name: {
+    LoginName: {
         type: DataTypes.STRING,
-        unique: true
+        unique: true,
+        allowNull: false
     },
-    Price: {
-        type: DataTypes.DECIMAL(6, 2),
-    },
-    Discount: {
-        type: DataTypes.DECIMAL(3, 2),
-    },
-    Description: {
+    Password: {
         type: DataTypes.STRING,
+        allowNull: false
     },
-    Requirement: {
+    Email: {
         type: DataTypes.STRING,
+        allowNull: false
     },
-    Images: {
+    Token: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    Permissions: {
         type: DataTypes.STRING,
     },
-    DownloadLink: {
-        type: DataTypes.STRING,
-        
-    },
+
     CreatedAt: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -46,16 +40,12 @@ const Game = db.define('Game', {
         allowNull: false,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
     },
-    Slug: {
-        type: DataTypes.STRING,
-        unique:true
-    }
 }, {
 
-    tableName: 'Game',
+    tableName: 'Admin',
     timestamps: false
 });
 
 
-Game.sync();
-module.exports = Game;
+Admin.sync();
+module.exports = Admin;

@@ -40,7 +40,7 @@ module.exports.create = async (req, res) => {
       const data = req.body;
       console.log(req.body);
       await Game.create({
-         GameId: generateRandomString(32),
+         GameId: generateRandomString(22),
          ...data,
          Slug: createSlug(data.Name)
       });
@@ -118,8 +118,32 @@ module.exports.delete = async (req, res) => {
 
 // [PATCH] CHANGE MULTI
 module.exports.changeMulti = async (req, res) => {
-   const {ids} = req.params;
-   ids.forEach(id => {
-      console.log(id, '\n');
-   });
+   try {
+      const {ids, data} = req.body;
+      console.log({ids, data});
+      for (const id of ids) {
+         console.log("ID:", id , "\n");
+         const gameBefore = await Game.findByPk(id);
+         if (data.Name){
+            if (gameBefore.Name != data.Name) {
+               data.Slug = createSlug(data.Name);
+            }
+         }
+         const gameAfter = await Game.update(data, {
+            where: {
+               GameId: id
+            }
+         })
+      }
+      res.json({
+         code: 200,
+         message: "Cập nhật thành công!",
+      })
+   } catch (error) {
+      res.json({
+         code: 400,
+         message: "Cập nhật thất bại !",
+         err: error
+      });
+   }
 }

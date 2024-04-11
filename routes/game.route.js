@@ -7,5 +7,5 @@ router.get('/:id', controller.detail);
 router.post('/create', controller.create);
 router.patch('/edit/:id', controller.edit);
 router.delete('/delete/:id', controller.delete);
-router.patch('/edit/:ids', controller.changeMulti)
+router.patch('/changeMulti/', controller.changeMulti)
 module.exports = router;
