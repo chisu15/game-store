@@ -3,14 +3,14 @@ const {
     DataTypes
 } = require('sequelize');
 const db = require('../configs/db');
-
+const Admin = require("./admin.model");
 const Game = db.define('Game', {
     GameId: {
         type: DataTypes.STRING,
         primaryKey: true,
     },
-    AdminId: {
-        type: DataTypes.INTEGER,
+    CreatedBy: {
+        type: DataTypes.STRING,
         allowNull: true,
     },
     Name: {
@@ -31,10 +31,11 @@ const Game = db.define('Game', {
     },
     Images: {
         type: DataTypes.STRING,
+        allowNull: true
     },
     DownloadLink: {
         type: DataTypes.STRING,
-        
+        allowNull: true
     },
     CreatedAt: {
         type: DataTypes.DATE,
@@ -56,6 +57,7 @@ const Game = db.define('Game', {
     timestamps: false
 });
 
+Game.belongsTo(Admin, { foreignKey: 'CreatedBy' });
 
 Game.sync();
 module.exports = Game;

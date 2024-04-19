@@ -3,13 +3,13 @@ const {
     DataTypes
 } = require('sequelize');
 const db = require('../configs/db');
-
+const Game = require("./game.model");
 const Admin = db.define('Admin', {
     AdminId: {
         type: DataTypes.STRING,
         primaryKey: true,
     },
-    LoginName: {
+    Username: {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false
@@ -45,7 +45,9 @@ const Admin = db.define('Admin', {
     tableName: 'Admin',
     timestamps: false
 });
-
+// Admin.associate = function(model) {
+//     Admin.hasMany(db.define("Game"));
+// }
 
 Admin.sync();
 module.exports = Admin;

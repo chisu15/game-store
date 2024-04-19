@@ -3,13 +3,19 @@ const Game = require("../models/game.model");
 const {
    createSlug
 } = require("../helpers/createSlug");
-const { generateRandomString } = require("../helpers/generate");
-
+const {
+   generateRandomString
+} = require("../helpers/generate");
+const Admin = require("../models/admin.model");
 // [GET] INDEX
 module.exports.index = async (req, res) => {
    try {
 
-      const games = await Game.findAll()
+      const games = await Game.findAll({
+         include: [Admin].forEach(),
+      })
+
+      // const games = await Game.findAll()
 
       res.status(200).json({
          code: 200,
@@ -101,7 +107,7 @@ module.exports.delete = async (req, res) => {
          });
       }
       await game.destroy();
-      
+
 
       res.json({
          code: 200,
@@ -119,12 +125,18 @@ module.exports.delete = async (req, res) => {
 // [PATCH] CHANGE MULTI
 module.exports.changeMulti = async (req, res) => {
    try {
-      const {ids, data} = req.body;
-      console.log({ids, data});
+      const {
+         ids,
+         data
+      } = req.body;
+      console.log({
+         ids,
+         data
+      });
       for (const id of ids) {
-         console.log("ID:", id , "\n");
+         console.log("ID:", id, "\n");
          const gameBefore = await Game.findByPk(id);
-         if (data.Name){
+         if (data.Name) {
             if (gameBefore.Name != data.Name) {
                data.Slug = createSlug(data.Name);
             }
