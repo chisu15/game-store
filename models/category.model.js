@@ -4,6 +4,8 @@ const {
 } = require('sequelize');
 const db = require('../configs/db');
 const Admin = require("./admin.model");
+const Game = require("./game.model");
+const GameCategory = require("./gameCategory.model");
 const Category = db.define('Category', {
     CategoryId: {
         type: DataTypes.STRING,
@@ -29,7 +31,6 @@ const Category = db.define('Category', {
     timestamps: true
 });
 
-Category.belongsTo(Admin, { foreignKey: 'CreatedBy' });
 
 Category.sync();
 module.exports = Category;

@@ -4,6 +4,8 @@ const {
 } = require('sequelize');
 const db = require('../configs/db');
 const Admin = require("./admin.model");
+const Category = require('./category.model');
+const GameCategory = require("./gameCategory.model");
 const Game = db.define('Game', {
     GameId: {
         type: DataTypes.STRING,
@@ -16,6 +18,10 @@ const Game = db.define('Game', {
     Name: {
         type: DataTypes.STRING,
         unique: true
+    },
+    CategoryId: {
+        type:DataTypes.STRING,
+        allowNull: true,
     },
     Price: {
         type: DataTypes.DECIMAL(6, 2),
@@ -57,7 +63,6 @@ const Game = db.define('Game', {
     timestamps: false
 });
 
-Game.belongsTo(Admin, { foreignKey: 'CreatedBy' });
 
 Game.sync();
 module.exports = Game;

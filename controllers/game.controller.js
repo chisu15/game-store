@@ -7,12 +7,21 @@ const {
    generateRandomString
 } = require("../helpers/generate");
 const Admin = require("../models/admin.model");
+const Category = require("../models/category.model");
+const GameCategory = require("../models/gameCategory.model");
+const Associate = require("../models/index.model");
 // [GET] INDEX
 module.exports.index = async (req, res) => {
    try {
 
       const games = await Game.findAll({
-         include: [Admin].forEach(),
+         include: [{
+            model: Admin,
+            attributes: ['Username'],
+            as: 'Admin',
+         },
+      ],
+
       })
 
       // const games = await Game.findAll()
@@ -22,7 +31,11 @@ module.exports.index = async (req, res) => {
          games: games
       });
    } catch (err) {
-      res.status(800).json(err);
+      res.json({
+         code: 800,
+         message: "Lấy dữ liệu thất bại!",
+         error: err.message
+      });;
       console.log(err);
    }
 
