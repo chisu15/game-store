@@ -100,6 +100,3 @@ module.exports.delete = async (id) => {
     }
 }
 
-module.exports.multiChange = async (ids) => {
-
-}
