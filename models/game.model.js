@@ -88,3 +88,14 @@ module.exports.update = async (id, data) => {
         return { success: false, message: 'Lỗi khi cập nhật bản ghi.' };
     }  
 }
+
+module.exports.delete = async (id) => {
+    try {
+        const result = await db.pool.request().query(`
+            DELETE FROM Game 
+            WHERE GameId = '${id}'
+        `);
+    } catch (error) {
+        return error.message;
+    }
+}

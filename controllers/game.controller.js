@@ -102,33 +102,31 @@ module.exports.edit = async (req, res) => {
 }
 
 // [DELETE] DELETE
-// module.exports.delete = async (req, res) => {
-//    try {
-//       const {
-//          id
-//       } = req.params;
-//       const game = await Game.findByPk(id)
-//       if (!game) {
-//          return res.status(404).json({
-//             code: 404,
-//             message: "Không tìm thấy game"
-//          });
-//       }
-//       await game.destroy();
-
-
-//       res.json({
-//          code: 200,
-//          message: "Xóa thành công!"
-//       });
-//    } catch (error) {
-//       res.json({
-//          code: 400,
-//          message: "Xóa thất bại!",
-//          err: error
-//       });
-//    }
-// }
+module.exports.delete = async (req, res) => {
+   try {
+      const {
+         id
+      } = req.params;
+      const game = await Game.detail(id)
+      if (!game) {
+         return res.status(404).json({
+            code: 404,
+            message: "Không tìm thấy game"
+         });
+      }
+      await Game.delete(id);
+      res.json({
+         code: 200,
+         message: "Xóa thành công!"
+      });
+   } catch (error) {
+      res.json({
+         code: 400,
+         message: "Xóa thất bại!",
+         err: error
+      });
+   }
+}
 
 // [PATCH] CHANGE MULTI
 // module.exports.changeMulti = async (req, res) => {
