@@ -59,9 +59,9 @@ module.exports.update = async (id, data) => {
         }
 
         const query = `
-            UPDATE Game
+            UPDATE Permission
             SET ${updates.join(', ')}
-            WHERE GameId = '${id}'
+            WHERE PermissionId = '${id}'
         `;
 
         const record = await db.pool.request().query(query);
