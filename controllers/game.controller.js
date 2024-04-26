@@ -6,30 +6,19 @@ const {
 const {
    generateRandomString
 } = require("../helpers/generate");
-const Admin = require("../models/admin.model");
-const Category = require("../models/category.model");
-const GameCategory = require("../models/gameCategory.model");
-const Associate = require("../models/index.model");
+// const Admin = require("../models/admin.model");
+// const Category = require("../models/category.model");
+// const GameCategory = require("../models/gameCategory.model");
+// const Associate = require("../models/index.model");
 // [GET] INDEX
 module.exports.index = async (req, res) => {
    try {
-
-      const games = await Game.findAll({
-         include: [{
-            model: Admin,
-            attributes: ['Username'],
-            as: 'Admin',
-         },
-      ],
-
-      })
-
-      // const games = await Game.findAll()
-
+      const games = await Game.getAll();
       res.status(200).json({
          code: 200,
          games: games
       });
+
    } catch (err) {
       res.json({
          code: 800,
@@ -46,32 +35,42 @@ module.exports.detail = async (req, res) => {
       const {
          id
       } = req.params;
-      const game = await Game.findByPk(id)
-      res.status(200).json(game);
+      const game = await Game.detail(id);
+      res.status(200).json({
+         code: 200,
+         game: game
+      });
    } catch (err) {
-      res.status(800).json(err);
+      res.json({
+         code: 800,
+         message: "Lấy dữ liệu thất bại!",
+         error: err.message
+      });;
+      console.log(err);
    }
 }
 
 // [POST] CREATE
 module.exports.create = async (req, res) => {
    try {
-      const data = req.body;
-      console.log(req.body);
-      await Game.create({
+      const data = {
          GameId: generateRandomString(22),
-         ...data,
-         Slug: createSlug(data.Name)
-      });
+         ...req.body,
+         Slug: createSlug(req.body.Title)
+      };
+      console.log(req.body);
+
+      await Game.create(data);
       res.json({
          code: 200,
          message: "Tạo thành công!",
+         game: data
       })
    } catch (err) {
       res.json({
          code: 400,
          message: "Tạo thất bại!",
-         err: err
+         err: err.message
       });
    }
 }
@@ -83,92 +82,88 @@ module.exports.edit = async (req, res) => {
          id
       } = req.params;
       const data = req.body;
-      const gameBefore = await Game.findByPk(id)
-      if (gameBefore.Name != data.Name) {
+      const gameBefore = await Game.detail(id)
+      if (gameBefore.Title != data.Title) {
          data.Slug = createSlug(data.Name);
       }
-      const gameAfter = await Game.update(data, {
-         where: {
-            GameId: id
-         }
-      })
+      const gameAfter = await Game.update(id, data)
       res.json({
          code: 200,
          message: "Cập nhật thành công!",
-         game: await Game.findByPk(id)
+         game: await Game.detail(id)
       })
    } catch (error) {
       res.json({
          code: 400,
          message: "Cập nhật thất bại!",
-         err: error
+         err: error.message
       });
    }
 }
 
 // [DELETE] DELETE
-module.exports.delete = async (req, res) => {
-   try {
-      const {
-         id
-      } = req.params;
-      const game = await Game.findByPk(id)
-      if (!game) {
-         return res.status(404).json({
-            code: 404,
-            message: "Không tìm thấy game"
-         });
-      }
-      await game.destroy();
+// module.exports.delete = async (req, res) => {
+//    try {
+//       const {
+//          id
+//       } = req.params;
+//       const game = await Game.findByPk(id)
+//       if (!game) {
+//          return res.status(404).json({
+//             code: 404,
+//             message: "Không tìm thấy game"
+//          });
+//       }
+//       await game.destroy();
 
 
-      res.json({
-         code: 200,
-         message: "Xóa thành công!"
-      });
-   } catch (error) {
-      res.json({
-         code: 400,
-         message: "Xóa thất bại!",
-         err: error
-      });
-   }
-}
+//       res.json({
+//          code: 200,
+//          message: "Xóa thành công!"
+//       });
+//    } catch (error) {
+//       res.json({
+//          code: 400,
+//          message: "Xóa thất bại!",
+//          err: error
+//       });
+//    }
+// }
 
 // [PATCH] CHANGE MULTI
-module.exports.changeMulti = async (req, res) => {
-   try {
-      const {
-         ids,
-         data
-      } = req.body;
-      console.log({
-         ids,
-         data
-      });
-      for (const id of ids) {
-         console.log("ID:", id, "\n");
-         const gameBefore = await Game.findByPk(id);
-         if (data.Name) {
-            if (gameBefore.Name != data.Name) {
-               data.Slug = createSlug(data.Name);
-            }
-         }
-         const gameAfter = await Game.update(data, {
-            where: {
-               GameId: id
-            }
-         })
-      }
-      res.json({
-         code: 200,
-         message: "Cập nhật thành công!",
-      })
-   } catch (error) {
-      res.json({
-         code: 400,
-         message: "Cập nhật thất bại !",
-         err: error
-      });
-   }
-}
+// module.exports.changeMulti = async (req, res) => {
+//    try {
+//       const {
+//          ids,
+//          data
+//       } = req.body;
+//       console.log({
+//          ids,
+//          data
+//       });
+//       for (const id of ids) {
+//          console.log("ID:", id, "\n");
+//          const gameBefore = await Game.findByPk(id);
+//          if (data.Name) {
+//             if (gameBefore.Name != data.Name) {
+//                data.Slug = createSlug(data.Name);
+//             }
+//          }
+//          const gameAfter = await Game.update(data, {
+//             where: {
+//                GameId: id
+//             }
+//          })
+//       }
+//       res.json({
+//          code: 200,
+//          message: "Cập nhật thành công!",
+//       })
+//    } catch (error) {
+//       res.json({
+//          code: 400,
+//          message: "Cập nhật thất bại !",
+//          err: error
+//       });
+//    }
+// }

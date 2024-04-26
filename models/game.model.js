@@ -1,68 +1,65 @@
-const {
-    Sequelize,
-    DataTypes
-} = require('sequelize');
 const db = require('../configs/db');
-const Admin = require("./admin.model");
-const Category = require('./category.model');
-const GameCategory = require("./gameCategory.model");
-const Game = db.define('Game', {
-    GameId: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-    },
-    CreatedBy: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    Name: {
-        type: DataTypes.STRING,
-        unique: true
-    },
-    CategoryId: {
-        type:DataTypes.STRING,
-        allowNull: true,
-    },
-    Price: {
-        type: DataTypes.DECIMAL(6, 2),
-    },
-    Discount: {
-        type: DataTypes.DECIMAL(3, 2),
-    },
-    Description: {
-        type: DataTypes.STRING,
-    },
-    Requirement: {
-        type: DataTypes.STRING,
-    },
-    Images: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    DownloadLink: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    CreatedAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-    },
-    UpdatedAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-    },
-    Slug: {
-        type: DataTypes.STRING,
-        unique:true
+
+
+module.exports.getAll = async () => {
+    try {
+        const record = await db.pool.request().query('select * from Game');
+        const result = record.recordset;
+        return result;
+    } catch (error) {
+        return error.message;
     }
-}, {
+};
 
-    tableName: 'Game',
-    timestamps: false
-});
+module.exports.detail = async (id)=> {
+    try {
+        const record = await db.pool.request().query(`
+            SELECT * FROM Game
+            Where GameId = '${id}'
+        `);
+        const result = record.recordset;
+        return result;
+    } catch (error) {
+        return error.message;
+    }   
+}
 
+module.exports.create = async (data) => {
+    try {
+        const result = await db.pool.request().query(`
+            INSERT INTO Game (GameId, Title, AdminId, CategoryId, Price, DiscountId, Description, Images, DownloadLink, Slug)
+            VALUES (
+                '${data.GameId}', 
+                '${data.Title}',
+                '${data.AdminId}',
+                '${data.CategoryId}',
+                '${data.Price}',
+                '${data.DiscountId}',
+                '${data.Description}',
+                '${data.Images}',
+                '${data.DownloadLink}',
+                '${data.Slug}'
+            )`);
 
-Game.sync();
-module.exports = Game;
+        if (result.rowsAffected && result.rowsAffected[0] > 0) {
+            return { success: true, message: 'Bản ghi đã được chèn thành công.' };
+        } else {
+            return { success: false, message: 'Không có bản ghi nào được chèn.' };
+        }
+    } catch (error) {
+        console.error('Lỗi khi chèn bản ghi:', error);
+        return { success: false, message: 'Lỗi khi chèn bản ghi.' };
+    }
+}
+
+// module.exports.update = async (id, data) => {
+//     try {
+//         const record = await db.pool.request().query(`
+//             UPDATE Game
+//             SET 
+//             WHERE GameId = '${id}'
+//         `);
+//     } catch (error) {
+//         return error.message;
+//     }  
+// }

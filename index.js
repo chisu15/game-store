@@ -12,6 +12,7 @@ app.use(cors());
 
 app.use(bodyParser.json())
 
+db.connect();
 // ROUTE
 const route = require('./routes/index.route')
 route(app);
