@@ -99,3 +99,7 @@ module.exports.delete = async (id) => {
         return error.message;
     }
 }
+
+module.exports.multiChange = async (ids) => {
+
+}

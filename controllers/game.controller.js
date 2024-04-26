@@ -129,39 +129,35 @@ module.exports.delete = async (req, res) => {
 }
 
 // [PATCH] CHANGE MULTI
-// module.exports.changeMulti = async (req, res) => {
-//    try {
-//       const {
-//          ids,
-//          data
-//       } = req.body;
-//       console.log({
-//          ids,
-//          data
-//       });
-//       for (const id of ids) {
-//          console.log("ID:", id, "\n");
-//          const gameBefore = await Game.findByPk(id);
-//          if (data.Name) {
-//             if (gameBefore.Name != data.Name) {
-//                data.Slug = createSlug(data.Name);
-//             }
-//          }
-//          const gameAfter = await Game.update(data, {
-//             where: {
-//                GameId: id
-//             }
-//          })
-//       }
-//       res.json({
-//          code: 200,
-//          message: "Cập nhật thành công!",
-//       })
-//    } catch (error) {
-//       res.json({
-//          code: 400,
-//          message: "Cập nhật thất bại !",
-//          err: error
-//       });
-//    }
-// }
+module.exports.changeMulti = async (req, res) => {
+   try {
+      const {
+         ids,
+         data
+      } = req.body;
+      console.log({
+         ids,
+         data
+      });
+      for (const id of ids) {
+         console.log("ID:", id, "\n");
+         const gameBefore = await Game.detail(id);
+         if (data.Title) {
+            if (gameBefore.Title != data.Title) {
+               data.Slug = createSlug(data.Title);
+            }
+         }
+         await Game.update(id, data)
+      }
+      res.json({
+         code: 200,
+         message: "Cập nhật thành công!",
+      })
+   } catch (error) {
+      res.json({
+         code: 400,
+         message: "Cập nhật thất bại !",
+         err: error
+      });
+   }
+}
