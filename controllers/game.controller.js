@@ -84,9 +84,9 @@ module.exports.edit = async (req, res) => {
       const data = req.body;
       const gameBefore = await Game.detail(id)
       if (gameBefore.Title != data.Title) {
-         data.Slug = createSlug(data.Name);
+         data.Slug = createSlug(data.Title);
       }
-      const gameAfter = await Game.update(id, data)
+      await Game.update(id, data)
       res.json({
          code: 200,
          message: "Cập nhật thành công!",

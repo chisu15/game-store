@@ -52,14 +52,39 @@ module.exports.create = async (data) => {
     }
 }
 
-// module.exports.update = async (id, data) => {
-//     try {
-//         const record = await db.pool.request().query(`
-//             UPDATE Game
-//             SET 
-//             WHERE GameId = '${id}'
-//         `);
-//     } catch (error) {
-//         return error.message;
-//     }  
-// }
+module.exports.update = async (id, data) => {
+    try {
+        let updates = [];
+
+        if (data.Title) updates.push(`Title = '${data.Title}'`);
+        if (data.AdminId) updates.push(`AdminId = '${data.AdminId}'`);
+        if (data.CategoryId) updates.push(`CategoryId = '${data.CategoryId}'`);
+        if (data.Price) updates.push(`Price = ${data.Price}`);
+        if (data.DiscountId) updates.push(`DiscountId = ${data.DiscountId}`);
+        if (data.Description) updates.push(`Description = '${data.Description}'`);
+        if (data.Images) updates.push(`Images = '${data.Images}'`);
+        if (data.DownloadLink) updates.push(`DownloadLink = '${data.DownloadLink}'`);
+        if (data.Slug) updates.push(`Slug = '${data.Slug}'`);
+
+        if (updates.length === 0) {
+            return { success: false, message: 'Không có trường nào được cập nhật.' };
+        }
+
+        const query = `
+            UPDATE Game
+            SET ${updates.join(', ')}
+            WHERE GameId = '${id}'
+        `;
+
+        const record = await db.pool.request().query(query);
+
+        if (record.rowsAffected && record.rowsAffected[0] > 0) {
+            return { success: true, message: 'Bản ghi đã được cập nhật thành công.' };
+        } else {
+            return { success: false, message: 'Không có bản ghi nào được cập nhật.' };
+        }
+    } catch (error) {
+        console.error('Lỗi khi cập nhật bản ghi:', error);
+        return { success: false, message: 'Lỗi khi cập nhật bản ghi.' };
+    }  
+}
