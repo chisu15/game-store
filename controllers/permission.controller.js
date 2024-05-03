@@ -16,7 +16,7 @@ module.exports.index = async (req, res) => {
       const permission = await Permission.getAll();
       res.status(200).json({
          code: 200,
-         Permission: permission
+         permission: permission
       });
 
    } catch (err) {
