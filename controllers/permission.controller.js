@@ -54,9 +54,9 @@ module.exports.detail = async (req, res) => {
 module.exports.create = async (req, res) => {
    try {
       const data = {
-        PermissionId: generateRandomString(22),
+        id: generateRandomString(22),
         ...req.body,
-        Slug: createSlug(req.body.Title)
+        slug: createSlug(req.body.title)
       };
       console.log(req.body);
 
@@ -83,8 +83,8 @@ module.exports.edit = async (req, res) => {
       } = req.params;
       const data = req.body;
       const permissionBefore = await Permission.detail(id)
-      if (permissionBefore.Title != data.Title) {
-         data.Slug = createSlug(data.Title);
+      if (permissionBefore.title != data.title) {
+         data.slug = createSlug(data.title);
       }
       await Permission.update(id, data)
       res.json({
@@ -142,9 +142,9 @@ module.exports.changeMulti = async (req, res) => {
       for (const id of ids) {
          console.log("ID:", id, "\n");
          const permissionBefore = await Permission.detail(id);
-         if (data.Title) {
-            if (permissionBefore.Title != data.Title) {
-               data.Slug = createSlug(data.Title);
+         if (data.title) {
+            if (permissionBefore.title != data.title) {
+               data.slug = createSlug(data.title);
             }
          }
          await Permission.update(id, data)

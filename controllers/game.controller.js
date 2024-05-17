@@ -54,23 +54,23 @@ module.exports.detail = async (req, res) => {
 module.exports.create = async (req, res) => {
    try {
       const data = {
-         GameId: generateRandomString(22),
+         id: generateRandomString(22),
          ...req.body,
-         Slug: createSlug(req.body.Title)
+         slug: createSlug(req.body.title)
       };
-      console.log(req.body);
+      console.log("Dữ liệu nhận được:", req.body);
 
       await Game.create(data);
-      res.json({
-         code: 200,
-         message: "Tạo thành công!",
+      res.status(201).json({
+         code: 201,
+         message: "Tạo game mới thành công!",
          game: data
-      })
+      });
    } catch (err) {
-      res.json({
+      res.status(400).json({
          code: 400,
-         message: "Tạo thất bại!",
-         err: err.message
+         message: "Không thể tạo game mới!",
+         error: err.message
       });
    }
 }
@@ -83,8 +83,8 @@ module.exports.edit = async (req, res) => {
       } = req.params;
       const data = req.body;
       const gameBefore = await Game.detail(id)
-      if (gameBefore.Title != data.Title) {
-         data.Slug = createSlug(data.Title);
+      if (gameBefore.title != data.title) {
+         data.slug = createslug(data.title);
       }
       await Game.update(id, data)
       res.json({
@@ -123,7 +123,7 @@ module.exports.delete = async (req, res) => {
       res.json({
          code: 400,
          message: "Xóa thất bại!",
-         err: error
+         err: error.message
       });
    }
 }
@@ -142,9 +142,9 @@ module.exports.changeMulti = async (req, res) => {
       for (const id of ids) {
          console.log("ID:", id, "\n");
          const gameBefore = await Game.detail(id);
-         if (data.Title) {
-            if (gameBefore.Title != data.Title) {
-               data.Slug = createSlug(data.Title);
+         if (data.title) {
+            if (gameBefore.title != data.title) {
+               data.slug = createslug(data.title);
             }
          }
          await Game.update(id, data)

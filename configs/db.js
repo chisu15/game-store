@@ -1,6 +1,6 @@
 const mssql = require("mssql");
 
-
+// Tải cấu hình từ biến môi trường
 require('dotenv').config();
 const config = {
   user: process.env.SQL_USERNAME,
@@ -8,68 +8,31 @@ const config = {
   server: process.env.SQL_SERVER,
   database: process.env.SQL_DATABASE,
   options: {
-    encrypt: true, 
-    trustServerCertificate: true 
+    encrypt: true, // Mã hóa dữ liệu
+    trustServerCertificate: true // Tin tưởng chứng chỉ máy chủ
   },
   pool: {
-      max: 10,
-      min: 0,
-      idleTimeoutMillis: 30000
+      max: 10, // Số kết nối tối đa
+      min: 0, // Số kết nối tối thiểu
+      idleTimeoutMillis: 30000 // Thời gian chờ tối đa
   }
 }
 
-const pool = new mssql.ConnectionPool(config)
+// Tạo pool kết nối
+const pool = new mssql.ConnectionPool(config);
 
+// Xuất pool để sử dụng ở các module khác
 module.exports = {
     pool
 }
+
+// Hàm kết nối đến cơ sở dữ liệu
 module.exports.connect = async () => {
     try {
         await pool.connect();
-        console.log("Connect DB Success!");
+        console.log("Kết nối CSDL thành công!");
      } catch (error) {
-        console.log(error);
+        console.log("Lỗi kết nối CSDL:", error);
      }
 }
 
-
-// Kết nối đến cơ sở dữ liệu SQL Server
-// const sequelize = new Sequelize(process.env.SQL_DATABASE, process.env.SQL_USERNAME, process.env.SQL_PASSWORD, {
-//     host: process.env.SQL_SERVER,
-//     dialect: "mssql",
-// });
-// sequelize.authenticate()
-// .then(() => {
-//   console.log('Connected to SQL Server');
-// })
-// .catch(err => {
-//   console.error('Error connecting to SQL Server:', err);
-// });
-
-// module.exports = sequelize;
-
-
-
-
-
-
-
-// const Sequelize = require('sequelize');
-// require('dotenv').config();
-
-
-// // Kết nối đến cơ sở dữ liệu SQL Server
-// const sequelize = new Sequelize(process.env.SQL_DATABASE, process.env.SQL_USERNAME, process.env.SQL_PASSWORD, {
-//     host: process.env.SQL_SERVER,
-//     dialect: "mssql",
-// });
-
-// sequelize.authenticate()
-// .then(() => {
-//   console.log('Connected to SQL Server');
-// })
-// .catch(err => {
-//   console.error('Error connecting to SQL Server:', err);
-// });
-
-// module.exports = sequelize;

@@ -15,7 +15,7 @@ module.exports.detail = async (id)=> {
     try {
         const record = await db.pool.request().query(`
             SELECT * FROM Permission
-            Where PermissionId = '${id}'
+            Where id = '${id}'
         `);
         const result = record.recordset;
         return result;
@@ -27,12 +27,12 @@ module.exports.detail = async (id)=> {
 module.exports.create = async (data) => {
     try {
         const result = await db.pool.request().query(`
-            INSERT INTO Permission (PermissionId, Title, Description, Slug)
+            INSERT INTO Permission (id, title, description, slug)
             VALUES (
-                '${data.PermissionId}', 
-                '${data.Title}',
-                '${data.Description}',
-                '${data.Slug}'
+                '${data.id}', 
+                '${data.title}',
+                '${data.description}',
+                '${data.slug}'
             )`);
 
         if (result.rowsAffected && result.rowsAffected[0] > 0) {
@@ -50,9 +50,9 @@ module.exports.update = async (id, data) => {
     try {
         let updates = [];
 
-        if (data.Title) updates.push(`Title = '${data.Title}'`);
-        if (data.Description) updates.push(`Description = '${data.Description}'`);
-        if (data.Slug) updates.push(`Slug = '${data.Slug}'`);
+        if (data.title) updates.push(`title = '${data.title}'`);
+        if (data.description) updates.push(`description = '${data.description}'`);
+        if (data.slug) updates.push(`slug = '${data.slug}'`);
 
         if (updates.length === 0) {
             return { success: false, message: 'Không có trường nào được cập nhật.' };
@@ -81,7 +81,7 @@ module.exports.delete = async (id) => {
     try {
         const result = await db.pool.request().query(`
             DELETE FROM Permission 
-            WHERE PermissionId = '${id}'
+            WHERE id = '${id}'
         `);
     } catch (error) {
         return error.message;
