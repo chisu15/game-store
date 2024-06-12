@@ -111,7 +111,7 @@ module.exports.delete = async (req, res) => {
       if (!category) {
          return res.status(404).json({
             code: 404,
-            message: "Không tìm thấy quyền"
+            message: "Không tìm thấy danh mục"
          });
       }
       await Category.delete(id);
@@ -123,7 +123,7 @@ module.exports.delete = async (req, res) => {
       res.json({
          code: 400,
          message: "Xóa thất bại!",
-         err: error
+         err: error.message
       });
    }
 }
@@ -157,7 +157,7 @@ module.exports.changeMulti = async (req, res) => {
       res.json({
          code: 400,
          message: "Cập nhật thất bại !",
-         err: error
+         err: error.message
       });
    }
 }

@@ -1,15 +1,15 @@
+const fs = require('fs');
+const path = require('path');
 const sequelize = require("sequelize");
 const Game = require("../models/game.model");
-const {
-   createSlug
-} = require("../helpers/createSlug");
-const {
-   generateRandomString
-} = require("../helpers/generate");
-// const Admin = require("../models/admin.model");
-// const Category = require("../models/category.model");
-// const GameCategory = require("../models/gameCategory.model");
-// const Associate = require("../models/index.model");
+const { createSlug } = require("../helpers/createSlug");
+const { generateRandomString } = require("../helpers/generate");
+
+const uploadDirectory = path.join(__dirname, '../uploads/');
+
+if (!fs.existsSync(uploadDirectory)) {
+  fs.mkdirSync(uploadDirectory, { recursive: true });
+}
 // [GET] INDEX
 module.exports.index = async (req, res) => {
    try {
@@ -82,10 +82,18 @@ module.exports.edit = async (req, res) => {
          id
       } = req.params;
       const data = req.body;
+      if (req.files && req.files.image) {
+         const imageFile = req.files.image;
+         const uploadPath = path.join(uploadDirectory, imageFile.name);
+         await imageFile.mv(uploadPath);
+   
+         data.image = `/uploads/${imageFile.name}`;
+       }
       const gameBefore = await Game.detail(id)
       if (gameBefore.title != data.title) {
          data.slug = createslug(data.title);
       }
+      console.log(data);
       await Game.update(id, data)
       res.json({
          code: 200,

@@ -3,6 +3,7 @@ const categoryRoute = require('./category.route');
 // const userRoute = require('./user.route');
 const adminRoute = require('./admin.route');
 const permissionRoute = require('./permission.route')
+const discountRoute = require("./discount.route");
 
 module.exports = (app) =>
 {
@@ -12,4 +13,6 @@ module.exports = (app) =>
     // app.use(version + "/users", userRoute);
     app.use(version + "/admin", adminRoute);
     app.use(version + "/permission", permissionRoute);
+    app.use(version + "/discount", discountRoute);
 }
+
