@@ -16,8 +16,10 @@
   },
   "dependencies": {
     "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "google-auth-library": "^9.11.0",
     "md5": "^2.3.0",
     "msnodesqlv8": "^4.1.2",
     "mssql": "^10.0.2",

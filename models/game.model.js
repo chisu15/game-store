@@ -1,20 +1,21 @@
 const db = require('../configs/db');
 const mssql = require("mssql");
-
+const { generateRandomString } = require('../helpers/generate');
 
 module.exports.getAll = async () => {
     try {
         const gameRecords = await db.pool.request().query(`
-            SELECT g.*, gc.categoryId
+            SELECT g.*, gc.categoryId, gi.imageUrl
             FROM Game g
             LEFT JOIN GameCategory gc ON g.id = gc.gameId
+            LEFT JOIN GameImage gi ON g.id = gi.gameId
         `);
         const games = gameRecords.recordset;
 
         // Tạo một đối tượng để lưu trữ kết quả cuối cùng
         const result = {};
 
-        // Kết hợp dữ liệu từ bảng Game và GameCategory
+        // Kết hợp dữ liệu từ bảng Game, GameCategory và GameImage
         games.forEach(game => {
             if (!result[game.id]) {
                 result[game.id] = {
@@ -24,14 +25,18 @@ module.exports.getAll = async () => {
                     price: game.price,
                     discount: game.discount,
                     description: game.description,
-                    image: game.image,
+                    images: [],
+                    trailer: game.trailer,
                     downloadLink: game.downloadLink,
                     slug: game.slug,
                     categories: []
                 };
             }
-            if (game.categoryId) {
+            if (game.categoryId && !result[game.id].categories.includes(game.categoryId)) {
                 result[game.id].categories.push(game.categoryId);
+            }
+            if (game.imageUrl && !result[game.id].images.includes(game.imageUrl)) {
+                result[game.id].images.push(game.imageUrl);
             }
         });
 
@@ -45,15 +50,15 @@ module.exports.getAll = async () => {
     }
 };
 
-
 module.exports.detail = async (id) => {
     try {
         const request = db.pool.request();
         request.input('id', mssql.NVarChar, id);
         const gameRecord = await request.query(`
-            SELECT g.*, gc.categoryId
+            SELECT g.*, gc.categoryId, gi.imageUrl
             FROM Game g
             LEFT JOIN GameCategory gc ON g.id = gc.gameId
+            LEFT JOIN GameImage gi ON g.id = gi.gameId
             WHERE g.id = @id
         `);
 
@@ -70,15 +75,19 @@ module.exports.detail = async (id) => {
             price: games[0].price,
             discount: games[0].discount,
             description: games[0].description,
-            image: games[0].image,
+            images: [],
+            trailer: games[0].trailer,
             downloadLink: games[0].downloadLink,
             slug: games[0].slug,
             categories: []
         };
 
         games.forEach(game => {
-            if (game.categoryId) {
+            if (game.categoryId && !gameDetail.categories.includes(game.categoryId)) {
                 gameDetail.categories.push(game.categoryId);
+            }
+            if (game.imageUrl && !gameDetail.images.includes(game.imageUrl)) {
+                gameDetail.images.push(game.imageUrl);
             }
         });
 
@@ -103,17 +112,17 @@ module.exports.create = async (data) => {
         request.input('price', mssql.Decimal, data.price);
         request.input('discount', mssql.NVarChar, data.discount);
         request.input('description', mssql.NVarChar, data.description);
-        request.input('image', mssql.Text, data.image);
+        request.input('trailer', mssql.Text, data.trailer);
         request.input('downloadLink', mssql.NVarChar, data.downloadLink);
         request.input('slug', mssql.NVarChar, data.slug);
 
         const gameResult = await request.query(`
-            INSERT INTO Game (id, title, admin, price, discount, description, image, downloadLink, slug)
-            VALUES (@id, @title, @admin, @price, @discount, @description, @image, @downloadLink, @slug)
+            INSERT INTO Game (id, title, admin, price, discount, description, trailer, downloadLink, slug)
+            VALUES (@id, @title, @admin, @price, @discount, @description, @trailer, @downloadLink, @slug)
         `);
 
         if (gameResult.rowsAffected && gameResult.rowsAffected[0] > 0) {
-            for (const category of data.category) {
+            for (const category of data.categories) {
                 const categoryRequest = new mssql.Request(transaction);
                 categoryRequest.input('gameId', mssql.NVarChar, data.id);
                 categoryRequest.input('categoryId', mssql.NVarChar, category);
@@ -121,6 +130,18 @@ module.exports.create = async (data) => {
                 await categoryRequest.query(`
                     INSERT INTO GameCategory (gameId, categoryId)
                     VALUES (@gameId, @categoryId)
+                `);
+            }
+
+            for (const imageUrl of data.images) {
+                const imageRequest = new mssql.Request(transaction);
+                imageRequest.input('id', mssql.NVarChar, generateRandomString(22));
+                imageRequest.input('gameId', mssql.NVarChar, data.id);
+                imageRequest.input('imageUrl', mssql.NVarChar, imageUrl);
+
+                await imageRequest.query(`
+                    INSERT INTO GameImage (id, gameId, imageUrl)
+                    VALUES (@id, @gameId, @imageUrl)
                 `);
             }
 
@@ -146,52 +167,83 @@ module.exports.update = async (id, data) => {
         const request = new mssql.Request(transaction);
 
         request.input('id', mssql.NVarChar, id);
-        if (data.title) { updates.push(`title = @title`); request.input('title', mssql.NVarChar, data.title); }
-        if (data.admin) { updates.push(`admin = @admin`); request.input('admin', mssql.NVarChar, data.admin); }
-        if (data.price) { updates.push(`price = @price`); request.input('price', mssql.Decimal, data.price); }
-        if (data.discount) { updates.push(`discount = @discount`); request.input('discount', mssql.NVarChar, data.discount); }
-        if (data.description) { updates.push(`description = @description`); request.input('description', mssql.NVarChar, data.description); }
-        if (data.image) { updates.push(`image = @image`); request.input('image', mssql.Text, data.image); }
-        if (data.downloadLink) { updates.push(`downloadLink = @downloadLink`); request.input('downloadLink', mssql.NVarChar, data.downloadLink); }
-        if (data.slug) { updates.push(`slug = @slug`); request.input('slug', mssql.NVarChar, data.slug); }
-
-        if (updates.length === 0) {
-            return { success: false, message: 'Không có trường nào được cập nhật.' };
+        if (data.title) {
+            updates.push(`title = @title`);
+            request.input('title', mssql.NVarChar, data.title);
+        }
+        if (data.admin) {
+            updates.push(`admin = @admin`);
+            request.input('admin', mssql.NVarChar, data.admin);
+        }
+        if (data.price) {
+            updates.push(`price = @price`);
+            request.input('price', mssql.Decimal, data.price);
+        }
+        if (data.discount) {
+            updates.push(`discount = @discount`);
+            request.input('discount', mssql.NVarChar, data.discount);
+        }
+        if (data.description) {
+            updates.push(`description = @description`);
+            request.input('description', mssql.NVarChar, data.description);
+        }
+        if (data.trailer) {
+            updates.push(`trailer = @trailer`);
+            request.input('trailer', mssql.Text, data.trailer);
+        }
+        if (data.downloadLink) {
+            updates.push(`downloadLink = @downloadLink`);
+            request.input('downloadLink', mssql.NVarChar, data.downloadLink);
+        }
+        if (data.slug) {
+            updates.push(`slug = @slug`);
+            request.input('slug', mssql.NVarChar, data.slug);
         }
 
-        const query = `
-            UPDATE Game
-            SET ${updates.join(', ')}
-            WHERE id = @id
-        `;
+        if (updates.length > 0) {
+            const query = `
+                UPDATE Game
+                SET ${updates.join(', ')}
+                WHERE id = @id
+            `;
+            await request.query(query);
+        }
 
-        const record = await request.query(query);
-
-        if (record.rowsAffected && record.rowsAffected[0] > 0) {
-            // Xóa các danh mục cũ và thêm các danh mục mới
+        // Xóa các danh mục cũ và thêm các danh mục mới
+        if (data.categories && Array.isArray(data.categories)) {
             await request.query(`
                 DELETE FROM GameCategory WHERE gameId = @id
             `);
-
-            if (data.category && data.category.length > 0) {
-                for (const category of data.category) {
-                    const categoryRequest = new mssql.Request(transaction);
-                    categoryRequest.input('gameId', mssql.NVarChar, id);
-                    categoryRequest.input('categoryId', mssql.NVarChar, category);
-
-                    await categoryRequest.query(`
-                        INSERT INTO GameCategory (gameId, categoryId)
-                        VALUES (@gameId, @categoryId)
-                    `);
-                }
+            for (const category of data.categories) {
+                const categoryRequest = new mssql.Request(transaction);
+                categoryRequest.input('gameId', mssql.NVarChar, id);
+                categoryRequest.input('categoryId', mssql.NVarChar, category);
+                await categoryRequest.query(`
+                    INSERT INTO GameCategory (gameId, categoryId)
+                    VALUES (@gameId, @categoryId)
+                `);
             }
-
-            await transaction.commit();
-            return { success: true, message: 'Bản ghi đã được cập nhật thành công.' };
-        } else {
-            await transaction.rollback();
-            return { success: false, message: 'Không có bản ghi nào được cập nhật.' };
         }
+
+        // Xóa các ảnh cũ và thêm các ảnh mới
+        if (data.images && Array.isArray(data.images)) {
+            await request.query(`
+                DELETE FROM GameImage WHERE gameId = @id
+            `);
+            for (const imageUrl of data.images) {
+                const imageRequest = new mssql.Request(transaction);
+                imageRequest.input('id', mssql.NVarChar, generateRandomString(22));
+                imageRequest.input('gameId', mssql.NVarChar, id);
+                imageRequest.input('imageUrl', mssql.NVarChar, imageUrl);
+                await imageRequest.query(`
+                    INSERT INTO GameImage (id, gameId, imageUrl)
+                    VALUES (@id, @gameId, @imageUrl)
+                `);
+            }
+        }
+
+        await transaction.commit();
+        return { success: true, message: 'Bản ghi đã được cập nhật thành công.' };
     } catch (error) {
         await transaction.rollback();
         console.error('Lỗi khi cập nhật bản ghi:', error);
@@ -199,11 +251,18 @@ module.exports.update = async (id, data) => {
     }
 };
 
-
 module.exports.delete = async (id) => {
     try {
         const request = db.pool.request();
         request.input('id', mssql.NVarChar, id);
+        const resultCate = await request.query(`
+            DELETE FROM GameCategory
+            WHERE GameId = @id
+        `)
+        const resultImage = await request.query(`
+            DELETE FROM GameImage 
+            WHERE gameId = @id
+        `);
         const result = await request.query(`
             DELETE FROM Game 
             WHERE id = @id
